@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <Python.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -1080,9 +1081,10 @@ StatusOr<PyArray> PyArray::BatchedDevicePut(
       TF_RETURN_IF_ERROR(
           jax::ApplyTransferGuardToHostToDevice(transfer_guard_formatter));
     }
+    // TODO(phawkins): remove .ptr() after nanobind transition is complete.
     TF_ASSIGN_OR_RETURN(
         DevicePutResult on_device,
-        DevicePut(x, dst_devices[i].get_client()->ifrt_client(),
+        DevicePut(x.ptr(), dst_devices[i].get_client()->ifrt_client(),
                   dst_devices[i].get(), options, dst_memory_kind));
     ifrt_arrays.push_back(std::move(on_device.ifrt_array));
     devices.push_back(ifrt_arrays.back()->sharding().devices().front());
